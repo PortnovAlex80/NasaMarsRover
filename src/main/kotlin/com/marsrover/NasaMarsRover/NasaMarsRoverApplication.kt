@@ -7,11 +7,12 @@ import com.marsrover.NasaMarsRover.ui.ConsoleUserInputOutput
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-//@SpringBootApplication
+@SpringBootApplication
 class NasaMarsRoverApplication
 
 fun main(args: Array<String>) {
-//	runApplication<NasaMarsRoverApplication>(*args)
+
+	runApplication<NasaMarsRoverApplication>(*args)
 
 	val userInputOutput = ConsoleUserInputOutput()
 	val roverInputAdapter = RoverInputAdapter(userInputOutput)
