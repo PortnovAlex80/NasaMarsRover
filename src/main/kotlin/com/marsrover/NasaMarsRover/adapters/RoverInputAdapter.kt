@@ -5,43 +5,66 @@ import com.marsrover.NasaMarsRover.domain.entities.Direction
 import com.marsrover.NasaMarsRover.domain.entities.Position
 
 class RoverInputAdapter(private val userInputOutput: UserInputOutputInterface) {
-    fun getUserRovers(): List<Pair<Position, Direction>>? {
-        val roversData = mutableListOf<Pair<Position, Direction>>()
-        userInputOutput.outputToUser("Enter number of rovers:")
-        val numberOfRovers = userInputOutput.readUserInput().toIntOrNull()
+    fun getNumberOfRovers(): Int {
+        var numberOfRovers: Int? = null
+        var input: String
 
-        if (numberOfRovers == null || numberOfRovers < 1) {
-            userInputOutput.outputToUser("Invalid number of rovers.")
-            return null
-        }
+        while (numberOfRovers == null || numberOfRovers < 1) {
+            userInputOutput.outputToUser("Enter number of rovers or type 'exit' to quit:")
+            input = userInputOutput.readUserInput()
 
-        for (i in 1..numberOfRovers) {
-            userInputOutput.outputToUser("Enter initial position for rover $i in format 'X Y DIRECTION':")
-            val roverInput = userInputOutput.readUserInput().split(' ')
-
-            if (roverInput.size != 3) {
-                userInputOutput.outputToUser("Invalid input for rover.")
-                return null
+            if (input.equals("exit", ignoreCase = true)) {
+                userInputOutput.outputToUser("Exiting the program.")
+                System.exit(0)
             }
 
-            val x = roverInput[0].toIntOrNull()
-            val y = roverInput[1].toIntOrNull()
-            val direction = validateDirection(roverInput[2])
+            numberOfRovers = input.toIntOrNull()
+
+            if (numberOfRovers == null || numberOfRovers < 1) {
+                userInputOutput.outputToUser("Invalid number of rovers. Please enter a positive integer.")
+            }
+        }
+
+        userInputOutput.outputToUser("Number of rovers is ${numberOfRovers}")
+        return numberOfRovers
+    }
+
+    fun getRoverData(index: Int): Pair<Position, Direction>? {
+        var roverData: Pair<Position, Direction>? = null
+        var input: List<String>
+
+        while (roverData == null) {
+            val directionsHelper = Direction.values().joinToString(", ") { "${it.name} (${it.name.first()})" }
+            userInputOutput.outputToUser("Enter initial position for rover $index in format 'X Y DIRECTION'. Possible directions are: $directionsHelper. Or type 'exit' to quit:")
+            input = userInputOutput.readUserInput().split(' ')
+
+            if (input.size == 1 && input[0].equals("exit", ignoreCase = true)) {
+                userInputOutput.outputToUser("Exiting the program.")
+                System.exit(0)
+            }
+
+            if (input.size != 3) {
+                userInputOutput.outputToUser("Invalid input for rover. Please enter 'X Y DIRECTION'.")
+                continue
+            }
+
+            val x = input[0].toIntOrNull()
+            val y = input[1].toIntOrNull()
+            val direction = validateDirection(input[2])
 
             if (x == null || y == null || direction == null) {
-                userInputOutput.outputToUser("Invalid data for rover.")
-                return null
+                userInputOutput.outputToUser("Invalid data for rover. ${x} ${y} ${direction}")
+            } else {
+                roverData = Position(x, y) to direction
             }
-
-            roversData.add(Position(x, y) to direction)
         }
 
-        return roversData
+        return roverData
     }
 
     private fun validateDirection(dir: String): Direction? {
         return try {
-            Direction.valueOf(dir.toUpperCase())
+            Direction.values().firstOrNull { it.name.startsWith(dir.toUpperCase()) }
         } catch (e: IllegalArgumentException) {
             null
         }
